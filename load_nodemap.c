@@ -1,10 +1,11 @@
+// Works, unit tested
 #include <stdio.h>
 #include "node.h"
 #include "bufferoperations.h"
 
 char* readfile(char* name);
 
-double load_nodemap(char* filename)
+char* load_nodemap(char* filename)
 {
     unsigned char *buffer = readfile(filename);
     int offset = 0;
@@ -14,12 +15,12 @@ double load_nodemap(char* filename)
     int numnodes = read_uint(buffer, offset);
     offset += 4;
 
-    NodeLinkedList *nodemap = malloc(numnodes*sizeof(NodeLinkedList));
-    Node *nodearray = malloc(numnodes*sizeof(Node));
+    NodeLinkedList *nodemap = calloc(numnodes, sizeof(NodeLinkedList));
+    Node *nodearray = calloc(numnodes, sizeof(Node));
 
     if (nodemap == NULL)
     {
-        printf("ERROR: Could not allocate memory for malloc!");
+        printf("ERROR: Could not allocate memory for calloc!");
         return;
     }
 
@@ -34,37 +35,41 @@ double load_nodemap(char* filename)
         offset += 4;
         nodearray[i].y = y;
 
-        nodemap[i].value = &(nodearray[i]);
+        nodemap[i].value = nodearray+i;
         if (i<numnodes+1)
         {
-            nodemap[i].next = &(nodemap[i+1]);
+            nodemap[i].next = nodemap+i+1;
         }
     }
 
-    // All nodes exist, now start depacking connection information
+    // All nodes created, now start depacking connection information
     NodeLinkedList *connections;
     unsigned int numconnections, j;
 
     for (i=0; i<numnodes; i++)
     {
         numconnections = buffer[offset++];
-        connections = malloc(numconnections * sizeof(*NodeLinkedList));
+        connections = calloc(sizeof(NodeLinkedList), numconnections);
         nodearray[i].connected_nodes = connections;
         for (j=0; j<numconnections; j++)
         {
-            connections->value = &(nodearray[read_uint(buffer, offset)]);
-            connections->next = connections+sizeof(NodeLinkedList);
-            connections = connections->next;
+            connections->value = nodearray + read_uint(buffer, offset);
             offset += 4;
+            if (j < (numconnections-1))
+            {
+                connections->next = connections + 1;
+                connections = connections->next;
+            }
             nodearray[i].connected_distances[j] = read_uint(buffer, offset);
             offset +=4;
             nodearray[i].connected_commands[j] = buffer[offset++];
         }
         // Yes, I know, this is a lot, but it's necessary
-        nodearray[i].path_history = malloc(sizeof(NodeLinkedList)*numnodes);
+        nodearray[i].path_history = calloc(sizeof(NodeLinkedList), numnodes);
     }
 
-    return (double) nodemap;
+    char* string_pointer = nodemap;
+    return string_pointer;
 }
 
 char* readfile(char *name)

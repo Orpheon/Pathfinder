@@ -6,7 +6,7 @@ typedef struct NodeLinkedList NodeLinkedList;
 
 struct Node
 {
-    NodeLinkedList *connected_nodes = 0;
+    NodeLinkedList *connected_nodes;
     unsigned int connected_distances[4];
     char connected_commands[4];
     unsigned int x;
@@ -18,8 +18,8 @@ struct Node
 
 struct NodeLinkedList
 {
-    Node *value = 0;
-    NodeLinkedList *next = 0;
+    Node *value;
+    NodeLinkedList *next;
 };
 
 #endif
