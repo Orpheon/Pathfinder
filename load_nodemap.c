@@ -15,8 +15,9 @@ char* load_nodemap(char* filename)
     int numnodes = read_uint(buffer, offset);
     offset += 4;
 
-    NodeLinkedList *nodemap = calloc(numnodes, sizeof(NodeLinkedList));
-    Node *nodearray = calloc(numnodes, sizeof(Node));
+    Nodemap *nodemap = calloc(1, sizeof(Nodemap));
+    nodemap->numnodes = numnodes;
+    nodemap->nodes = calloc(numnodes, sizeof(Node));
 
     if (nodemap == NULL)
     {
@@ -30,42 +31,30 @@ char* load_nodemap(char* filename)
     {
         x = read_uint(buffer, offset);
         offset += 4;
-        nodearray[i].x = x;
         y = read_uint(buffer, offset);
         offset += 4;
-        nodearray[i].y = y;
-
-        nodemap[i].value = nodearray+i;
-        if (i<numnodes+1)
-        {
-            nodemap[i].next = nodemap+i+1;
-        }
+        nodemap->nodes[i].x = x;
+        nodemap->nodes[i].y = y;
     }
 
     // All nodes created, now start depacking connection information
-    NodeLinkedList *connections;
     unsigned int numconnections, j;
 
     for (i=0; i<numnodes; i++)
     {
         numconnections = buffer[offset++];
-        connections = calloc(sizeof(NodeLinkedList), numconnections);
-        nodearray[i].connected_nodes = connections;
+        nodemap->nodes[i].numconnections = numconnections;
         for (j=0; j<numconnections; j++)
         {
-            connections->value = nodearray + read_uint(buffer, offset);
+            nodemap->nodes[i].connected_nodes[j] = nodemap->nodes + read_uint(buffer, offset);
             offset += 4;
-            if (j < (numconnections-1))
-            {
-                connections->next = connections + 1;
-                connections = connections->next;
-            }
-            nodearray[i].connected_distances[j] = read_uint(buffer, offset);
+            nodemap->nodes[i].connected_distances[j] = read_uint(buffer, offset);
             offset +=4;
-            nodearray[i].connected_commands[j] = buffer[offset++];
+            nodemap->nodes[i].connected_commands[j] = buffer[offset++];
         }
         // Yes, I know, this is a lot, but it's necessary
-        nodearray[i].path_history = calloc(sizeof(NodeLinkedList), numnodes);
+        nodemap->nodes[i].path_history = calloc(1, sizeof(Nodemap));
+        nodemap->nodes[i].path_history->nodes = calloc(numnodes, sizeof(Node*));
     }
 
     char* string_pointer = nodemap;

@@ -2,23 +2,13 @@
 
 double destroy_nodemap(double nodemap_pointer)
 {
-    NodeLinkedList *node = nodemap_pointer, nextnode;
-    while (true)
+    Nodemap *nodemap = nodemap_pointer;
+    int i;
+    for(i=0; i<nodemap->numnodes; i++)
     {
-        free((node->value)->connected_nodes);
-        free((node->value)->connected_distances);
-        free((node->value)->connected_commands);
-        free((node->value)->path_history);
-        free(node->value);
-        nextnode = node->next;
-        free(node);
-        if (nextnode == 0)
-        {
-            break;
-        }
-        else
-        {
-            node = nextnode;
-        }
+        free(nodemap->nodes[i].path_history->nodes);
+        free(nodemap->nodes[i].path_history);
     }
+    free(nodemap->nodes);
+    free(nodemap);
 }

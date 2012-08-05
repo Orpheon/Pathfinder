@@ -2,24 +2,25 @@
 #define NODE_H
 
 typedef struct Node Node;
-typedef struct NodeLinkedList NodeLinkedList;
+typedef struct Nodemap Nodemap;
 
 struct Node
 {
-    NodeLinkedList *connected_nodes;
+    unsigned char numconnections;
+    Node* connected_nodes[4];
     unsigned int connected_distances[4];
     char connected_commands[4];
     unsigned int x;
     unsigned int y;
     // Temporary variables
     unsigned int path_length;
-    NodeLinkedList *path_history;
+    Nodemap *path_history;
 };
 
-struct NodeLinkedList
+struct Nodemap
 {
-    Node *value;
-    NodeLinkedList *next;
+    Node *nodes;
+    int numnodes;
 };
 
 #endif
