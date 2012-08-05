@@ -13,7 +13,7 @@ struct Node
     unsigned int x;
     unsigned int y;
     // Temporary variables
-    unsigned int path_length;
+    int path_length;
     Nodemap *path_history;
 };
 

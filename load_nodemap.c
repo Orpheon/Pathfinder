@@ -52,6 +52,7 @@ char* load_nodemap(char* filename)
             offset +=4;
             nodemap->nodes[i].connected_commands[j] = buffer[offset++];
         }
+        nodemap->nodes[i].path_length = -1;
         // Yes, I know, this is a lot, but it's necessary
         nodemap->nodes[i].path_history = calloc(1, sizeof(Nodemap));
         nodemap->nodes[i].path_history->nodes = calloc(numnodes, sizeof(Node*));
