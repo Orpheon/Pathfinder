@@ -54,7 +54,6 @@ __declspec(dllexport) double load_nodemap(char* filename)
             offset += 4;
             nodemap->nodes[i].connected_commands[j] = buffer[offset++];
         }
-        nodemap->nodes[i].path_length = -1;
         nodemap->nodes[i].path_history = calloc(1, sizeof(Nodemap));
         nodemap->nodes[i].path_history->nodes = calloc(numnodes, sizeof(Node));
         if (nodemap->nodes[i].path_history == NULL || nodemap->nodes[i].path_history->nodes == NULL)
@@ -63,7 +62,6 @@ __declspec(dllexport) double load_nodemap(char* filename)
             return -1;
         }
     }
-    printf("Num connections:%i", counter);
 
     double r = (uintptr_t)nodemap;
     return r;
