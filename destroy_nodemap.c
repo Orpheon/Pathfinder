@@ -1,8 +1,10 @@
+#include <stdint.h>
 #include "node.h"
 
-double destroy_nodemap(double nodemap_pointer)
+__declspec(dllexport) double destroy_nodemap(double nodemap_pointer)
 {
-    Nodemap *nodemap = nodemap_pointer;
+    Nodemap *nodemap = (Nodemap*)(uintptr_t)nodemap_pointer;
+
     int i;
     for(i=0; i<nodemap->numnodes; i++)
     {
@@ -11,4 +13,6 @@ double destroy_nodemap(double nodemap_pointer)
     }
     free(nodemap->nodes);
     free(nodemap);
+
+    return 0;
 }

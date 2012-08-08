@@ -1,11 +1,12 @@
 // Works, unit tested
 #include <stdio.h>
+#include <stdint.h>
 #include "node.h"
 #include "bufferoperations.h"
 
 char* readfile(char* name);
 
-char* load_nodemap(char* filename)
+__declspec(dllexport) double load_nodemap(char* filename)
 {
     unsigned char *buffer = readfile(filename);
     int offset = 0;
@@ -19,10 +20,10 @@ char* load_nodemap(char* filename)
     nodemap->numnodes = numnodes;
     nodemap->nodes = calloc(numnodes, sizeof(Node));
 
-    if (nodemap == NULL)
+    if (nodemap == NULL || nodemap->nodes == NULL)
     {
-        printf("ERROR: Could not allocate memory for calloc!");
-        return;
+        printf("ERROR: Could not allocate memory for the nodemap!");
+        return -1;
     }
 
     int i, x, y;
@@ -38,28 +39,34 @@ char* load_nodemap(char* filename)
     }
 
     // All nodes created, now start depacking connection information
-    unsigned int numconnections, j;
+    unsigned int numconnections, j, counter=0;
 
     for (i=0; i<numnodes; i++)
     {
         numconnections = buffer[offset++];
+        counter += numconnections;
         nodemap->nodes[i].numconnections = numconnections;
         for (j=0; j<numconnections; j++)
         {
             nodemap->nodes[i].connected_nodes[j] = nodemap->nodes + read_uint(buffer, offset);
             offset += 4;
             nodemap->nodes[i].connected_distances[j] = read_uint(buffer, offset);
-            offset +=4;
+            offset += 4;
             nodemap->nodes[i].connected_commands[j] = buffer[offset++];
         }
         nodemap->nodes[i].path_length = -1;
-        // Yes, I know, this is a lot, but it's necessary
         nodemap->nodes[i].path_history = calloc(1, sizeof(Nodemap));
-        nodemap->nodes[i].path_history->nodes = calloc(numnodes, sizeof(Node*));
+        nodemap->nodes[i].path_history->nodes = calloc(numnodes, sizeof(Node));
+        if (nodemap->nodes[i].path_history == NULL || nodemap->nodes[i].path_history->nodes == NULL)
+        {
+            printf("ERROR: Could not allocate memory for path_history!");
+            return -1;
+        }
     }
+    printf("Num connections:%i", counter);
 
-    char* string_pointer = nodemap;
-    return string_pointer;
+    double r = (uintptr_t)nodemap;
+    return r;
 }
 
 char* readfile(char *name)
